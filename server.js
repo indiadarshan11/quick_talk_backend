@@ -11,10 +11,15 @@ const PORT = process.env.PORT || 3000;
 
 connectDB(); // Connect to MongoDB
 
-app.use(cors());
+// ✅ CORS setup
+app.use(cors({
+    origin: '*', // or 'http://localhost:62425'
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+}));
 app.use(bodyParser.json());
 
-app.use('/api/auth', authRoutes);
+app.use('/api', authRoutes);
 
 app.listen(PORT, () => {
     console.log(`✅ Server is running on port ${PORT}`);
