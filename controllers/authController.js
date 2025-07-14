@@ -107,5 +107,37 @@ const loginUser = async (req, res) => {
     }
 };
 
+const matchContacts = async (req, res) => {
+    const { contacts } = req.body;
 
-module.exports = { registerUser, loginUser };
+    if (!contacts || !Array.isArray(contacts)) {
+        return res.status(400).json({
+            statusCode: 400,
+            message: "Contacts array is required",
+        });
+    }
+
+    try {
+        const matchedUsers = await User.find({
+            mobile: { $in: contacts },
+        }).select('name mobile _id'); // Only return required fields
+
+        res.status(200).json({
+            statusCode: 200,
+            users: matchedUsers.map(user => ({
+                userId: user._id,
+                name: user.name,
+                mobile: user.mobile,
+            })),
+        });
+    } catch (error) {
+        res.status(500).json({
+            statusCode: 500,
+            message: "Server error",
+            error: error.message,
+        });
+    }
+};
+
+
+module.exports = { registerUser, loginUser, matchContacts };
