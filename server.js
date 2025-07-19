@@ -74,16 +74,13 @@ io.on('connection', (socket) => {
     });
 
     //calling function
-    socket.on("start_call", ({ from, to, type }) => {
+    socket.on("start_call", ({ from, to, type, callerName }) => {
         const targetSocketId = userSocketMap[to];
-
         if (targetSocketId) {
-            io.to(targetSocketId).emit("incoming_call", { from, type });
-            console.log(`📞 Call initiated from ${from} to ${to}`);
-        } else {
-            console.log(`❌ Cannot initiate call — user ${to} not connected`);
+            io.to(targetSocketId).emit("incoming_call", { from, type, callerName });
         }
     });
+
 
 
 
