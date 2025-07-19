@@ -29,18 +29,51 @@ app.use(cors({
 app.use(bodyParser.json());
 app.use('/api', authRoutes);
 
+const userSocketMap = {};
+
 // ✅ Socket.IO Setup
 io.on('connection', (socket) => {
     console.log('⚡ New client connected:', socket.id);
 
+    // ✅ Receive and store userId on login/connection
+    socket.on('register', (userId) => {
+        userSocketMap[userId] = socket.id;
+        console.log(`👤 User ${userId} registered with socket ${socket.id}`);
+    });
+
     // Receive message and broadcast
+    // ✅ Handle message send
     socket.on('send_message', (data) => {
-        console.log('📨 Message:', data);
-        io.emit('receive_message', data); // Broadcast to all
+        const { to, from, text, time } = data;
+
+        const targetSocketId = userSocketMap[to];
+
+        if (targetSocketId) {
+            io.to(targetSocketId).emit('receive_message', {
+                from,
+                text,
+                time,
+            });
+            console.log(`📤 Sent message from ${from} to ${to}`);
+        } else {
+            console.log(`❌ User ${to} is not connected`);
+        }
     });
 
     socket.on('disconnect', () => {
-        console.log('❌ Client disconnected:', socket.id);
+        // remove disconnected socket from map
+        for (const userId in userSocketMap) {
+            if (userSocketMap[userId] === socket.id) {
+                delete userSocketMap[userId];
+                console.log(`❌ Disconnected: ${userId}`);
+                break;
+            }
+        }
+    });
+
+    //calling function
+    socket.on("start_call", ({ from, to, type }) => {
+        io.to(to).emit("incoming_call", { from, type });
     });
 });
 
