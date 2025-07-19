@@ -37,8 +37,10 @@ io.on('connection', (socket) => {
 
     // ✅ Receive and store userId on login/connection
     socket.on('register', (userId) => {
+
         userSocketMap[userId] = socket.id;
-        console.log(`👤 User ${userId} registered with socket ${socket.id}`);
+        socket.join(userId); // 👈 join a room using userId
+        console.log(`👤 User ${userId} registered and joined room ${userId}`);
     });
 
     // Receive message and broadcast
@@ -72,9 +74,12 @@ io.on('connection', (socket) => {
     });
 
     //calling function
+    //calling function
     socket.on("start_call", ({ from, to, type }) => {
         io.to(to).emit("incoming_call", { from, type });
     });
+
+
 });
 
 // ✅ Start server
