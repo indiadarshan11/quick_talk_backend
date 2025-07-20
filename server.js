@@ -81,6 +81,34 @@ io.on('connection', (socket) => {
         }
     });
 
+    // 🔁 WebRTC offer signaling
+    socket.on("offer", ({ to, offer }) => {
+        const targetSocketId = userSocketMap[to];
+        if (targetSocketId) {
+            io.to(targetSocketId).emit("offer", { from: socket.id, offer });
+            console.log(`📡 Offer sent from ${socket.id} to ${to}`);
+        }
+    });
+
+    // 🔁 WebRTC answer signaling
+    socket.on("answer", ({ to, answer }) => {
+        const targetSocketId = userSocketMap[to];
+        if (targetSocketId) {
+            io.to(targetSocketId).emit("answer", { from: socket.id, answer });
+            console.log(`📞 Answer sent from ${socket.id} to ${to}`);
+        }
+    });
+
+    // 🔁 ICE Candidate exchange
+    socket.on("ice-candidate", ({ to, candidate }) => {
+        const targetSocketId = userSocketMap[to];
+        if (targetSocketId) {
+            io.to(targetSocketId).emit("ice-candidate", { from: socket.id, candidate });
+            console.log(`🧊 ICE Candidate sent from ${socket.id} to ${to}`);
+        }
+    });
+
+
 
 
 
